@@ -6,28 +6,28 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 
-namespace RealTimeServer
+namespace PubSubServer
 {
     public class Startup
     {
+        private readonly IConfiguration _configuration;
+
         public Startup(IConfiguration configuration)
         {
-            Configuration = configuration;
+            _configuration = configuration;
         }
 
-        public IConfiguration Configuration { get; }
-        
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
             services.AddAzureClients(builder =>
             {
-                var hubName = Configuration["Azure:WebPubSub:Hub"];
-                builder.AddWebPubSubServiceClient(Configuration["Azure:WebPubSub:ConnectionString"], hubName);
+                var hubName = _configuration["Azure:WebPubSub:Hub"];
+                builder.AddWebPubSubServiceClient(_configuration["Azure:WebPubSub:ConnectionString"], hubName);
             });
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo {Title = "RealTimeServer", Version = "v1"});
+                c.SwaggerDoc("v1", new OpenApiInfo {Title = "PubSubServer", Version = "v1"});
             });
         }
 
@@ -37,7 +37,7 @@ namespace RealTimeServer
             {
                 app.UseDeveloperExceptionPage();
                 app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "RealTimeServer v1"));
+                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "PubSubServer v1"));
             }
 
             app.UseHttpsRedirection();

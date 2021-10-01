@@ -6,28 +6,29 @@ using Azure.Messaging.WebPubSub;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
-namespace RealTimeServer.Controllers
+namespace PubSubServer.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class NegotiateController : ControllerBase
+    public class Controller : ControllerBase
     {
-        private readonly ILogger<NegotiateController> _logger;
+        private readonly ILogger<Controller> _logger;
         private readonly WebPubSubServiceClient _webPubSubServiceClient;
 
-        public NegotiateController(ILogger<NegotiateController> logger, WebPubSubServiceClient webPubSubServiceClient)
+        public Controller(ILogger<Controller> logger, WebPubSubServiceClient webPubSubServiceClient)
         {
             _logger = logger;
             _webPubSubServiceClient = webPubSubServiceClient;
         }
 
-        [HttpPost("{clientId}/equipments/{equipmentNumber}")]
-        public async Task<Response> Get(
+        [HttpPost("negotiate/{clientId}/equipments/{equipmentNumber}")]
+        public async Task<Response> Negotiate(
             [FromRoute] string clientId,
             [FromRoute] string equipmentNumber,
             [FromBody] Request request)
         {
-            _logger.LogInformation($"Negotiate with client '{clientId}'. Subscribe for {equipmentNumber} with fields {string.Join(",", request.Fields)}");
+            _logger.LogInformation("Client '{ClientId}' subscribes for {EquipmentNumber} with fields {Fields}",
+                clientId, equipmentNumber, string.Join(",", request.Fields));
 
             var groups = request.Fields
                 .Select(field => $"{equipmentNumber}_{field}")
@@ -40,8 +41,21 @@ namespace RealTimeServer.Controllers
 
             return new Response(url.AbsoluteUri, groups);
         }
+
+        [HttpPost("send")]
+        public async Task Publish(Publish request)
+        {
+            _logger.LogInformation("Send value '{Value}' to group '{Group}'",
+                request.Value, request.Group);
+
+            await _webPubSubServiceClient.SendToGroupAsync(request.Group, request.Value);
+        }
     }
 
     public record Request(IEnumerable<string> Fields);
     public record Response(string Url, IEnumerable<string> Groups);
+    public record Publish(string EquipmentNumber, string Field, string Value)
+    {
+        public string Group => $"{EquipmentNumber}_{Field}";
+    }
 }

@@ -9,11 +9,12 @@ using Websocket.Client;
 
 Console.WriteLine("Enter equipment number:");
 var equipmentNumber = Console.ReadLine();
+
 Console.WriteLine("Enter fields by comma:");
 var fields = Console.ReadLine()?.Split(',');
 
 // Negotiate
-var response = await Negotiate("Client1", equipmentNumber, fields);
+var response = await Negotiate("https://localhost:5001", equipmentNumber, fields);
 
 // Connect
 using var client = new WebsocketClient(new Uri(response.Url), () =>
@@ -47,21 +48,23 @@ foreach (var group in response.Groups)
 
 Console.Read();
 
-async Task<Response> Negotiate(string clientId, string equipmentNumber, IEnumerable<string> fields)
+async Task<Response> Negotiate(string host, string equipmentNumber, IEnumerable<string> fields)
 {
+    const string clientId = "Client1";
+    
     using HttpClient httpClient = new();
     var responseMessage = await httpClient.PostAsJsonAsync(
-        $"https://localhost:5001/negotiate/{clientId}/equipments/{equipmentNumber}", new
+        $"{host}/negotiate/{clientId}/equipments/{equipmentNumber}", new
         {
             Fields = fields
         });
 
     responseMessage.EnsureSuccessStatusCode();
-    return JsonSerializer.Deserialize<Response>(await responseMessage.Content.ReadAsStringAsync(),
-        new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true
-        });
+
+    return await responseMessage.Content.ReadFromJsonAsync<Response>(new JsonSerializerOptions
+    {
+        PropertyNameCaseInsensitive = true
+    });
 }
 
 public record Response(string Url, IEnumerable<string> Groups);
