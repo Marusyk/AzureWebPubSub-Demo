@@ -14,6 +14,7 @@ Web PubSub
 - https://channel9.msdn.com/Shows/The-Launch-Space/Build-WebSocket-based-web-apps-with-the-Azure-Web-PubSub-Service
 - https://www.youtube.com/watch?v=2rHsZrSCYs4
 - https://techcommunity.microsoft.com/t5/apps-on-azure/build-a-real-time-whiteboard-application-with-azure-web-pubsub/ba-p/2522265?WT.mc_id=twitter-0000-azureadvocates
+- https://youtu.be/Nl9X-6cYtkQ
 
 
 WebSockets
