@@ -14,15 +14,19 @@ namespace PubSubServer.Controllers
     {
         private readonly ILogger<Controller> _logger;
         private readonly WebPubSubServiceClient _webPubSubServiceClient;
+        private readonly MemoryStorage _memoryStorage;
 
-        public Controller(ILogger<Controller> logger, WebPubSubServiceClient webPubSubServiceClient)
+        private readonly TimeSpan _tokenLifeTime = TimeSpan.FromDays(365);
+
+        public Controller(ILogger<Controller> logger, WebPubSubServiceClient webPubSubServiceClient, MemoryStorage memoryStorage)
         {
             _logger = logger;
             _webPubSubServiceClient = webPubSubServiceClient;
+            _memoryStorage = memoryStorage;
         }
 
-        [HttpPost("negotiate/{clientId}/equipments/{equipmentNumber}")]
-        public async Task<Response> Negotiate(
+        [HttpPost("subscriptions/{clientId}/equipments/{equipmentNumber}")]
+        public async Task<Response> Subscribe(
             [FromRoute] string clientId,
             [FromRoute] string equipmentNumber,
             [FromBody] Request request)
@@ -30,16 +34,15 @@ namespace PubSubServer.Controllers
             _logger.LogInformation("Client '{ClientId}' subscribes for {EquipmentNumber} with fields {Fields}",
                 clientId, equipmentNumber, string.Join(",", request.Fields));
 
-            var groups = request.Fields
-                .Select(field => $"{equipmentNumber}_{field}")
-                .ToList();
+            var subscription = new Subscription(equipmentNumber, request.Fields);
+            _memoryStorage.Add(clientId, subscription);
 
             var url = await _webPubSubServiceClient.GenerateClientAccessUriAsync(
-                roles: groups.Select(group => $"webpubsub.joinLeaveGroup.{group}"),
-                expiresAfter: TimeSpan.FromDays(365),
+                roles: subscription.Groups.Select(group => $"webpubsub.joinLeaveGroup.{group}"),
+                expiresAfter: _tokenLifeTime,
                 userId: clientId);
 
-            return new Response(url.AbsoluteUri, groups);
+            return new Response(url.AbsoluteUri);
         }
 
         [HttpPost("send")]
@@ -53,7 +56,7 @@ namespace PubSubServer.Controllers
     }
 
     public record Request(IEnumerable<string> Fields);
-    public record Response(string Url, IEnumerable<string> Groups);
+    public record Response(string Url);
     public record Publish(string EquipmentNumber, string Field, string Value)
     {
         public string Group => $"{EquipmentNumber}_{Field}";

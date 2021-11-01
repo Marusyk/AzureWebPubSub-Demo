@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31424.327
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PubSubClient", "PubSubClient\PubSubClient.csproj", "{7E394824-8AE7-47CC-A21A-E3677C0749BC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PubSubClient", "PubSubClient\PubSubClient.csproj", "{7E394824-8AE7-47CC-A21A-E3677C0749BC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PubSubServer", "PubSubServer\PubSubServer.csproj", "{EF8DCA27-7E92-4B14-B02E-8F7859F3186E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PubSubServer", "PubSubServer\PubSubServer.csproj", "{EF8DCA27-7E92-4B14-B02E-8F7859F3186E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

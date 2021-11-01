@@ -8,19 +8,19 @@ using System.Threading.Tasks;
 using Websocket.Client;
 
 Console.WriteLine("Enter equipment number:");
-var equipmentNumber = Console.ReadLine();
+var equipmentNumberStr = Console.ReadLine();
 
 Console.WriteLine("Enter fields by comma:");
-var fields = Console.ReadLine()?.Split(',');
+var fieldsArray = Console.ReadLine()?.Split(',');
 
 // Negotiate
-var response = await Negotiate("https://localhost:5001", equipmentNumber, fields);
+var response = await Negotiate("https://localhost:7701", equipmentNumberStr, fieldsArray);
 
 // Connect
 using var client = new WebsocketClient(new Uri(response.Url), () =>
 {
     var inner = new ClientWebSocket();
-    inner.Options.AddSubProtocol("json.webpubsub.azure.v1");
+    // inner.Options.AddSubProtocol("json.webpubsub.azure.v1"); // optional
     return inner;
 });
 client.ReconnectTimeout = null;
@@ -33,19 +33,6 @@ client.MessageReceived.Subscribe(msg =>
 await client.Start();
 Console.WriteLine("Connected");
 
-// Joining groups
-var ackId = 1;
-foreach (var group in response.Groups)
-{
-    Console.WriteLine($"Joining group: {group}");
-    client.Send(JsonSerializer.Serialize(new
-    {
-        type = "joinGroup",
-        group = group,
-        ackId = ackId++
-    }));
-}
-
 Console.Read();
 
 async Task<Response> Negotiate(string host, string equipmentNumber, IEnumerable<string> fields)
@@ -54,7 +41,7 @@ async Task<Response> Negotiate(string host, string equipmentNumber, IEnumerable<
     
     using HttpClient httpClient = new();
     var responseMessage = await httpClient.PostAsJsonAsync(
-        $"{host}/negotiate/{clientId}/equipments/{equipmentNumber}", new
+        $"{host}/subscriptions/{clientId}/equipments/{equipmentNumber}", new
         {
             Fields = fields
         });
@@ -67,4 +54,4 @@ async Task<Response> Negotiate(string host, string equipmentNumber, IEnumerable<
     });
 }
 
-public record Response(string Url, IEnumerable<string> Groups);
+public record Response(string Url);
