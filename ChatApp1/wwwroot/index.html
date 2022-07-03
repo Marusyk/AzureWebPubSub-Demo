@@ -67,7 +67,7 @@
 <body>
     <div id="app" class="container-fluid h-100 d-flex flex-column flex-nowrap p-0">
         <nav class="navbar navbar-dark bg-dark flex-md-nowrap p-0 shadow">
-            <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="#">A simple Azure Web PubSub Chat</a>
+            <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="#">A simple Azure Web PubSub Chat + Hub</a>
             <div class="m-3">
                 <span class="text-light">Welcome <a href="#"></a></span>
                 <template v-if="client.connected">
@@ -90,8 +90,12 @@
                         <input type="text" class="form-control" v-model="client.endpoint" id="endpointInput"
                             aria-describedby="endpointHelp" placeholder="Type Your User Name Here">
                         <button type="submit" class="btn btn-primary" style="width: 100px;"
-                            :disabled="!client.endpoint">Connect</button>
+                            :disabled="!client.endpoint||client.connected">Connect</button>
                     </div>
+                </form>
+                <form v-on:submit.prevent="disconnect(client)" class="py-2">
+                    <button type="submit" class="btn btn-primary" style="width: 100px;"
+                        :disabled="!client.connected">Close</button>
                 </form>
                 <div class="bg-light chat" v-bind:scrollTop="$attrs.scrollHeight">
                     <div class="m-2" v-for="message in client.chat.messages" v-bind:key="message.id">
@@ -173,16 +177,14 @@
             try {
                 var websocket = client.connection = new WebSocket(data.url);
                 websocket.onopen = e => {
-                    addItem(`[${new Date().toISOString()}] Client WebSocket opened.`, client.logs);
                     if (onConnected) onConnected(client);
                     client.userId = user;
                     client.connected = true;
                     addItem(`[${new Date().toISOString()}] ${user} connected.`, client.logs);
                 }
                 websocket.onclose = e => {
-                    this.connected = false;
-                    addItem(`[${new Date().toISOString()}] Client WebSocket closed: ` + e, client.logs);
-                    addItem(`[${new Date().toISOString()}] Disconnected. ${user}`, client.logs);
+                    client.connected = false;
+                    addItem(`[${new Date().toISOString()}] ${user} disconnected`, client.logs);
                 }
                 websocket.onerror = e => {
                     addItem(`[${new Date().toISOString()}] Client WebSocket error, check the Console window for details: ` + e, client.logs);
@@ -200,12 +202,6 @@
             data: data,
             methods: {
                 connect: function (client) {
-                    // close the previous connection if any and start a new connection
-                    if (client.connection) {
-                        client.connection.close();
-                        addItem(`${client.userId} disconnected.`, client.logs);
-                    }
-                    console.log("12");
                     connect(client, client.endpoint, null,
                         (client, msg) => {
                             let response = msg.data.split('>');
@@ -231,6 +227,9 @@
                         }
                     ))
                     client.newMessage = '';
+                },
+                disconnect: function (client) {
+                    client.connection.close();
                 }
             }
         });

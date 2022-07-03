@@ -51,6 +51,14 @@ public class EventsController : ControllerBase
         else if (eventType == "azure.webpubsub.sys.disconnected")
         {
             _logger.LogInformation("User '{UseId}' disconnected", userId);
+
+            var message = new
+            {
+                type = "system",
+                @event = "message",
+                data = $"{userId} disconnected"
+            };
+            await _webPubSubClient.SendToAllAsync($"Server>{JsonSerializer.Serialize(message)}");
         }
         else if (eventType == "azure.webpubsub.user.message")
         {

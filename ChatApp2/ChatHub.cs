@@ -18,7 +18,7 @@ public class ChatHub : WebPubSubHub
         string userId = request.ConnectionContext.UserId;
 
         _logger.LogInformation("User '{UseId}' connected", userId);
-        
+
         var message = new
         {
             type = "system",
@@ -28,13 +28,19 @@ public class ChatHub : WebPubSubHub
         await _serviceClient.SendToAllAsync($"Server>{JsonSerializer.Serialize(message)}");
     }
 
-    public override Task OnDisconnectedAsync(DisconnectedEventRequest request)
+    public override async Task OnDisconnectedAsync(DisconnectedEventRequest request)
     {
         string userId = request.ConnectionContext.UserId;
 
         _logger.LogInformation("User '{UseId}' disconnected", userId);
 
-        return Task.CompletedTask;
+        var message = new
+        {
+            type = "system",
+            @event = "message",
+            data = $"{userId} disconnected"
+        };
+        await _serviceClient.SendToAllAsync($"Server>{JsonSerializer.Serialize(message)}");
     }
 
     public override async ValueTask<UserEventResponse> OnMessageReceivedAsync(UserEventRequest request, CancellationToken cancellationToken)
