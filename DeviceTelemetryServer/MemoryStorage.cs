@@ -11,13 +11,13 @@ public class MemoryStorage
         _data.AddOrUpdate(clientId, subscription, (s, subscription1) => subscription);
     }
 
-    public Task<Subscription?> GetSubscription(string clientId)
+    public Task<Subscription> GetSubscription(string clientId)
     {
         if (!_data.TryGetValue(clientId, out var subscription))
         {
-            return Task.FromResult<Subscription?>(null);
+            return Task.FromResult<Subscription>(null);
         }
-        return Task.FromResult<Subscription?>(subscription);
+        return Task.FromResult<Subscription>(subscription);
     }
 
     public Task Remove(string clientId)
@@ -27,7 +27,7 @@ public class MemoryStorage
     }
 }
 
-public record Subscription(string EquipmentNumber, IEnumerable<string> Fields)
+public record Subscription(string DeviceId, IEnumerable<string> Indicators)
 {
-    public IEnumerable<string> Groups => Fields.Select(field => $"{EquipmentNumber}_{field}");
+    public IEnumerable<string> Groups => Indicators.Select(indicator => $"{DeviceId}_{indicator}".ToLowerInvariant());
 }
