@@ -1,9 +1,10 @@
 using Azure.Messaging.WebPubSub;
 using Microsoft.AspNetCore.Mvc;
 
-namespace ChatApp.Controllers;
+namespace ChatApp1.Controllers;
 
 [ApiController]
+[Route("[controller]")]
 public class NegotiateController : ControllerBase
 {
     private readonly WebPubSubServiceClient _webPubSubClient;
@@ -15,12 +16,12 @@ public class NegotiateController : ControllerBase
         _logger = logger;
     }
 
-    [HttpGet("negotiate")]
+    [HttpGet]
     public async Task<IActionResult> Get([FromQuery] string id)
     {
         _logger.LogInformation("User {UserId} requested URL", id);
 
         var clientUrl = await _webPubSubClient.GetClientAccessUriAsync(userId: id);
-        return new ObjectResult(clientUrl.AbsoluteUri);
+        return new ObjectResult(new { url = clientUrl.AbsoluteUri });
     }
 }

@@ -1,7 +1,8 @@
+using System.Text.Json;
 using Azure.Messaging.WebPubSub;
 using Microsoft.AspNetCore.Mvc;
 
-namespace ChatApp.Controllers;
+namespace ChatApp1.Controllers;
 
 [ApiController]
 [Route("[controller]")]
@@ -16,28 +17,36 @@ public class EventsController : ControllerBase
         _logger = logger;
     }
 
-    // abuse protection of cloudevents
     [HttpOptions]
-    public IActionResult Options()
+    public IActionResult Options() // abuse protection of cloudevents
     {
-        if (Request.Headers["WebHook-Request-Origin"].Count > 0)
+        if (Request.Headers["WebHook-Request-Origin"].Count <= 0)
         {
-            Response.Headers.Add("WebHook-Allowed-Origin", "*");
-            return Ok();
+            return BadRequest();
         }
-    
-        return BadRequest();
+
+        Response.Headers.Add("WebHook-Allowed-Origin", "*");
+        return Ok();
     }
 
     [HttpPost]
     public async Task<IActionResult> Handle()
     {
-        var eventType = Request.Headers["ce-type"].ToString();
+        // https://docs.microsoft.com/en-us/azure/azure-web-pubsub/reference-cloud-events
+        var eventType = Request.Headers["ce-type"].ToString(); 
         var userId = Request.Headers["ce-userId"].ToString();
 
         if (eventType == "azure.webpubsub.sys.connected")
         {
             _logger.LogInformation("User '{UseId}' connected", userId);
+
+            var message = new
+            {
+                type = "system",
+                @event = "message",
+                data = $"{userId} connected"
+            };
+            await _webPubSubClient.SendToAllAsync($"Server>{JsonSerializer.Serialize(message)}");
         }
         else if (eventType == "azure.webpubsub.sys.disconnected")
         {
@@ -46,11 +55,11 @@ public class EventsController : ControllerBase
         else if (eventType == "azure.webpubsub.user.message")
         {
             using var stream = new StreamReader(Request.Body);
-            var body = await stream.ReadToEndAsync();
+            var message = await stream.ReadToEndAsync();
 
-            _logger.LogInformation("User '{UserId}' has sent the message: {Body}", userId, body);
+            _logger.LogInformation("User '{UserId}' has sent the message: {Message}", userId, message);
 
-            await _webPubSubClient.SendToAllAsync($"[{userId}] {body}");
+            await _webPubSubClient.SendToAllAsync($"{userId}>{message}");
         }
 
         return Ok();

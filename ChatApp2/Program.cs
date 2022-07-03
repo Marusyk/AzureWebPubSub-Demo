@@ -12,12 +12,8 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
+app.UseSwagger();
+app.UseSwaggerUI();
 app.UseHttpsRedirection();
 app.UseDefaultFiles();
 app.UseStaticFiles();
@@ -34,7 +30,8 @@ app.MapGet("/negotiate", async context =>
         return;
     }
     var serviceClient = context.RequestServices.GetRequiredService<WebPubSubServiceClient<ChatHub>>();
-    await context.Response.WriteAsync(serviceClient.GetClientAccessUri(userId: id).AbsoluteUri);
+    var clientUrl = serviceClient.GetClientAccessUri(userId: id);
+    await context.Response.WriteAsJsonAsync(new { url = clientUrl.AbsoluteUri });
 });
 
 app.Run();

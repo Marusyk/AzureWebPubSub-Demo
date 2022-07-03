@@ -1,4 +1,5 @@
-﻿using Microsoft.Azure.WebPubSub.AspNetCore;
+﻿using System.Text.Json;
+using Microsoft.Azure.WebPubSub.AspNetCore;
 using Microsoft.Azure.WebPubSub.Common;
 
 public class ChatHub : WebPubSubHub
@@ -12,13 +13,19 @@ public class ChatHub : WebPubSubHub
         _logger = logger;
     }
 
-    public override Task OnConnectedAsync(ConnectedEventRequest request)
+    public override async Task OnConnectedAsync(ConnectedEventRequest request)
     {
         string userId = request.ConnectionContext.UserId;
 
         _logger.LogInformation("User '{UseId}' connected", userId);
-
-        return Task.CompletedTask;
+        
+        var message = new
+        {
+            type = "system",
+            @event = "message",
+            data = $"{userId} connected"
+        };
+        await _serviceClient.SendToAllAsync($"Server>{JsonSerializer.Serialize(message)}");
     }
 
     public override Task OnDisconnectedAsync(DisconnectedEventRequest request)
@@ -33,11 +40,11 @@ public class ChatHub : WebPubSubHub
     public override async ValueTask<UserEventResponse> OnMessageReceivedAsync(UserEventRequest request, CancellationToken cancellationToken)
     {
         string userId = request.ConnectionContext.UserId;
-        string body = request.Data.ToString();
+        string message = request.Data.ToString();
 
-        _logger.LogInformation("User '{UserId}' has sent the message: {Body}", userId, body);
+        _logger.LogInformation("User '{UserId}' has sent the message: {Message}", userId, message);
 
-        await _serviceClient.SendToAllAsync($"[{userId}] {body}");
+        await _serviceClient.SendToAllAsync($"{userId}>{message}");
 
         return request.CreateResponse(string.Empty);
     }

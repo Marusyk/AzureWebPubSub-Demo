@@ -8,15 +8,17 @@ namespace ChatFunc;
 
 public static class NegotiateFunction
 {
-    [FunctionName("Negotiate")]
-    public static string Negotiate(
+    [FunctionName("negotiate")]
+    public static Response Negotiate(
         [HttpTrigger(AuthorizationLevel.Anonymous, "get")] HttpRequest req,
-        [WebPubSubConnection(Hub = "chat",  UserId = "{query.id}")] WebPubSubConnection connection,
+        [WebPubSubConnection(Hub = "ChatHub",  UserId = "{query.id}")] WebPubSubConnection connection,
         ILogger log)
     {
         string userId = req.Query["id"];
         log.LogInformation("User {UserId} requested URL", userId);
 
-        return connection.Uri.AbsoluteUri;
+        return new Response(connection.Uri.AbsoluteUri);
     }
 }
+
+public record Response(string Url); 
