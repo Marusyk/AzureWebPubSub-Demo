@@ -1,0 +1,13 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "dotnet",
+    "EventHubConnectionAppSetting": "",
+    "WebPubSubConnectionString": ""
+  },
+  "Host": {
+    "LocalHttpPort": 7132,
+    "CORS": "*"
+  }
+}

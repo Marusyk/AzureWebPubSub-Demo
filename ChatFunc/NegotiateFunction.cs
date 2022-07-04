@@ -11,7 +11,7 @@ public static class NegotiateFunction
     [FunctionName("negotiate")]
     public static Response Negotiate(
         [HttpTrigger(AuthorizationLevel.Anonymous, "get")] HttpRequest req,
-        [WebPubSubConnection(Hub = "ChatHub",  UserId = "{query.id}")] WebPubSubConnection connection,
+        [WebPubSubConnection(Hub = "ChatHubFunc", UserId = "{query.id}")] WebPubSubConnection connection,
         ILogger log)
     {
         string userId = req.Query["id"];
@@ -21,4 +21,4 @@ public static class NegotiateFunction
     }
 }
 
-public record Response(string Url); 
+public record Response(string Url);
