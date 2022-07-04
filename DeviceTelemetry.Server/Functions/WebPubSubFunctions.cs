@@ -3,7 +3,7 @@ using Microsoft.Azure.WebJobs.Extensions.WebPubSub;
 using Microsoft.Azure.WebPubSub.Common;
 using Microsoft.Extensions.Logging;
 
-namespace DeviceTelemetryServer.Functions;
+namespace DeviceTelemetry.Server.Functions;
 
 internal class WebPubSubFunctions
 {

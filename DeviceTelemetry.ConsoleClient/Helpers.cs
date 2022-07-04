@@ -3,7 +3,7 @@ using System.Net.Mime;
 using System.Text;
 using System.Text.Json;
 
-namespace DeviceTelemetryClient;
+namespace DeviceTelemetry.ConsoleClient;
 
 public static class Helpers
 {

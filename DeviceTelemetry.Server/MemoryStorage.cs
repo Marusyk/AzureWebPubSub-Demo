@@ -1,6 +1,6 @@
 ﻿using System.Collections.Concurrent;
 
-namespace DeviceTelemetryServer;
+namespace DeviceTelemetry.Server;
 
 public class MemoryStorage
 {

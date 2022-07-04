@@ -3,7 +3,7 @@ using Microsoft.Azure.WebJobs.Extensions.WebPubSub;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
 
-namespace DeviceTelemetryServer.Functions;
+namespace DeviceTelemetry.Server.Functions;
 
 public class IoTHubFunctions
 {

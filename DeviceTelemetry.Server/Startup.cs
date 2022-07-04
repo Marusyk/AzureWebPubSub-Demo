@@ -1,4 +1,4 @@
-﻿using DeviceTelemetryServer;
+﻿using DeviceTelemetry.Server;
 using Microsoft.Azure.Functions.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -6,7 +6,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 
 [assembly: FunctionsStartup(typeof(Startup))]
-namespace DeviceTelemetryServer;
+namespace DeviceTelemetry.Server;
 
 public class Startup : FunctionsStartup
 {

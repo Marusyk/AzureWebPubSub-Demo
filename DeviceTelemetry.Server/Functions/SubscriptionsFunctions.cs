@@ -3,7 +3,7 @@ using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Azure.WebJobs.Extensions.WebPubSub;
 using Microsoft.Extensions.Logging;
 
-namespace DeviceTelemetryServer.Functions;
+namespace DeviceTelemetry.Server.Functions;
 
 public class SubscriptionsFunctions
 {

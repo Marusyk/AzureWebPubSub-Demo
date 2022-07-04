@@ -1,6 +1,6 @@
 ﻿using System.Net.WebSockets;
 using Websocket.Client;
-using static DeviceTelemetryClient.Helpers;
+using static DeviceTelemetry.ConsoleClient.Helpers;
 
 var deviceId = ReadDeviceId("1032888");
 
